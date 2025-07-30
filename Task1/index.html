@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Responsive Wiki Page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #fff;
+        }
+        
+        header {
+            border: 1px solid #ccc;
+            padding: 10px 15px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8f8f8;
+        }
+        
+        .breadcrumbs {
+            font-size: 14px;
+            color: #555;
+        }
+        
+        .search-container {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .search-container input[type="text"] {
+            padding: 5px;
+        }
+        
+        .top-nav {
+            background: #eaeaea;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            border-bottom: 1px solid #ccc;
+        }
+        
+        .top-nav-links a {
+            margin-right: 15px;
+            font-size: 14px;
+            text-decoration: none;
+            color: #0077cc;
+        }
+        
+        .top-nav .print-icon {
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        
+        aside {
+            flex: 0 0 200px;
+            padding: 15px;
+            background: #f3f3f3;
+            border-right: 1px solid #ddd;
+        }
+        
+        aside button {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 10px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        main {
+            flex: 1;
+            padding: 20px;
+        }
+        
+        main h1 {
+            font-size: 22px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        main img {
+            display: block;
+            margin: 15px auto;
+            max-width: 100%;
+            border: 1px solid #ccc;
+        }
+        
+        .links {
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        
+        .links a {
+            margin-right: 10px;
+            color: #0077cc;
+            text-decoration: none;
+        }
+        
+        footer {
+            padding-top: 15px;
+            font-size: 14px;
+            border-top: 1px solid #ddd;
+            margin-top: 10px;
+        }
+        
+        footer a {
+            color: #0077cc;
+            text-decoration: none;
+            margin-left: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            aside {
+                border-right: none;
+                border-bottom: 1px solid #ddd;
+            }
+            .top-nav {
+                flex-direction: column;
+            }
+            .search-container {
+                width: 100%;
+                margin-top: 10px;
+            }
+            .search-container input[type="text"] {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="breadcrumbs">Dashboard &gt; Main &gt; Home</div>
+        <div class="search-container">
+            <input type="text" placeholder="Search..." />
+            <button>Search</button>
+        </div>
+    </header>
+
+    <div class="top-nav">
+        <div class="top-nav-links">
+            <a href="#">Welcome Peldi</a>
+            <a href="#">History</a>
+            <a href="#">Preferences</a>
+            <a href="#">Administration</a>
+            <a href="#">Log Out</a>
+        </div>
+        <div class="print-icon">🖨️</div>
+    </div>
+
+    <div class="container">
+        <aside>
+            <h1>Wiki</h1>
+            <button>Page Operations</button>
+            <button>Browse Space</button>
+            <button>Add Content</button>
+        </aside>
+
+        <main>
+            <h1>Welcome to Our Wiki!</h1>
+            <p>Welcome to our awesome wiki. A place for us to share knowledge yadda yadda yadda.</p>
+            <img src="https://i.ytimg.com/vi/MELKuexR3sQ/mqdefault.jpg" alt="Demo Image" />
+            <p>And other text lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+
+            <div class="links">
+                <strong>10 Children.</strong>
+                <a href="#">Show Children</a> |
+                <a href="#">View in Hierarchy</a> |
+                <a href="#">Add Child Page</a>
+            </div>
+
+            <footer>
+                0 Comments
+                <a href="#">Add Comment</a>
+            </footer>
+        </main>
+    </div>
+</body>
+
+</html>
