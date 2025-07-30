@@ -8,14 +8,10 @@
   <ItemGroup>
     <None Remove="Interfaces\" />
     <None Remove="Services\" />
-    <None Remove="Data\" />
-    <None Remove="Data\Backup\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Interfaces\" />
     <Folder Include="Services\" />
-    <Folder Include="Data\" />
-    <Folder Include="Data\Backup\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.2.0" />

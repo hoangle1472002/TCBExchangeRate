@@ -1,11 +1,11 @@
 ﻿using System.Globalization;
 using System.Text.Json;
-using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using TCBExchangeRate.Application.Dtos;
 using TCBExchangeRate.Application.Interfaces;
+using TCBExchangeRate.Application.Models.Responses;
 using TCBExchangeRate.Domain.Entities;
 using TCBExchangeRate.Infrastructure.Interfaces;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace TCBExchangeRate.Infrastructure.Services;
 
@@ -65,6 +65,31 @@ public class ExchangeRateService : IExchangeRateService
         }
 
         return totalRatesSaved;
+    }
+
+    public async Task<List<ExchangeRateResponse>> GetExchangeRateSnapshotsAsync(DateOnly date, string currencyCode)
+    {
+        var startUtc = DateTime.SpecifyKind(date.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc);
+        var endUtc = DateTime.SpecifyKind(date.ToDateTime(TimeOnly.MaxValue), DateTimeKind.Utc);
+
+        var exchangeRates = _exchangeRateRepository.QueryExchangeRates()
+                                                   .Where(rate =>
+                                                        rate.Currency.Code == currencyCode &&
+                                                        rate.Snapshot.SnapshotDateTime >= startUtc &&
+                                                        rate.Snapshot.SnapshotDateTime <= endUtc)
+                                                   .OrderBy(rate => rate.Currency.Code)
+                                                   .ThenBy(rate => rate.Snapshot.SnapshotDateTime)
+                                                   .Select(rate => new ExchangeRateResponse
+                                                   {
+                                                        CurrencyCode = rate.Currency.Code,
+                                                        SnapshotTime = rate.Snapshot.SnapshotDateTime,
+                                                        PurchaseCashCheque = rate.BidRateCK,
+                                                        PurchaseTransfer = rate.BidRateTM,
+                                                        SellingCashCheque = rate.AskRate,
+                                                        SellingTransfer = rate.AskRateTM
+                                                   });
+
+        return await exchangeRates.ToListAsync();
     }
 
     private HttpClient CreateConfiguredClient()

@@ -7,6 +7,7 @@ namespace TCBExchangeRate.Infrastructure.Interfaces
         Task<List<DateTime>> GetSnapshotTimesAsync(DateOnly date);
         Task AddSnapshotsAsync(IEnumerable<ExchangeRateSnapshot> snapshots);
         Task SaveChangesAsync();
+        public IQueryable<ExchangeRate> QueryExchangeRates();
     }
 }
 

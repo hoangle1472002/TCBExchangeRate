@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using TCBExchangeRate.Application.Models.Responses;
 using TCBExchangeRate.Domain.Entities;
 using TCBExchangeRate.Infrastructure.Interfaces;
 using TCBExchangeRate.Persistence;
@@ -32,6 +33,13 @@ namespace TCBExchangeRate.Infrastructure.Repositories
         public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();
+        }
+
+        public IQueryable<ExchangeRate> QueryExchangeRates()
+        {
+            return _context.ExchangeRates
+                                        .Include(x => x.Snapshot)
+                                        .Include(x => x.Currency);
         }
     }
 }

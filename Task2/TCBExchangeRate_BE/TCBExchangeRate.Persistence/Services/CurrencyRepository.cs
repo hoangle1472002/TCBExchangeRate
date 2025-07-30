@@ -19,6 +19,13 @@ namespace TCBExchangeRate.Persistence.Services
                 .Where(c => codes.Contains(c.Code))
                 .ToListAsync();
         }
+
+        public async Task<List<Currency>> GetAllCurrenciesAsync()
+        {
+            return await _context.Currencies
+                .OrderBy(c => c.Code)
+                .ToListAsync();
+        }
     }
 }
 
