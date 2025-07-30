@@ -17,15 +17,15 @@ namespace TCBExchangeRate.API.Controllers
         [HttpPost("fetch")]
         public async Task<IActionResult> Fetch([FromQuery] DateOnly date)
         {
-            var count = await _exchangeRateService.ImportExchangeRatesAsync(date);
-            return Ok(new { Saved = count });
+            var result = await _exchangeRateService.ImportExchangeRatesAsync(date);
+            return result.Success ? Ok(result) : BadRequest(result);
         }
 
         [HttpGet("snapshots")]
         public async Task<IActionResult> GetExchangeRateSnapshots([FromQuery] DateOnly date, [FromQuery] string currencyCode)
         {
             var result = await _exchangeRateService.GetExchangeRateSnapshotsAsync(date, currencyCode);
-            return Ok(result);
+            return result.Success ? Ok(result) : BadRequest(result);
         }
     }
 }

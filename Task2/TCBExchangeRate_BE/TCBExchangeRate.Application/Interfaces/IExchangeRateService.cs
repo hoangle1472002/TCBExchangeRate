@@ -4,7 +4,7 @@ namespace TCBExchangeRate.Application.Interfaces
 {
     public interface IExchangeRateService
     {
-        Task<int> ImportExchangeRatesAsync(DateOnly date);
-        Task<List<ExchangeRateResponse>> GetExchangeRateSnapshotsAsync(DateOnly date, string currencyCode);
+        Task<Result<int>> ImportExchangeRatesAsync(DateOnly date);
+        Task<Result<List<ExchangeRateResponse>>> GetExchangeRateSnapshotsAsync(DateOnly date, string currencyCode);
     }
 }

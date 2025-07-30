@@ -2,6 +2,7 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using TCBExchangeRate.Application.Dtos;
+using TCBExchangeRate.Application.Helpers;
 using TCBExchangeRate.Application.Interfaces;
 using TCBExchangeRate.Application.Models.Responses;
 using TCBExchangeRate.Domain.Entities;
@@ -16,6 +17,7 @@ public class ExchangeRateService : IExchangeRateService
     private readonly ICurrencyRepository _currencyRepository;
 
     private const string BaseUrlFormat = "https://techcombank.com/content/techcombank/web/vn/vi/cong-cu-tien-ich/ty-gia/_jcr_content.exchange-rates.{0}.{1}.integration.json";
+    private const string DefaultSnapshotTime = "00-00-00";
 
     public ExchangeRateService(
         IHttpClientFactory httpClientFactory,
@@ -27,14 +29,14 @@ public class ExchangeRateService : IExchangeRateService
         _currencyRepository = currencyRepository;
     }
 
-    public async Task<int> ImportExchangeRatesAsync(DateOnly date)
+    public async Task<Result<int>> ImportExchangeRatesAsync(DateOnly date)
     {
         var client = CreateConfiguredClient();
-        var timeListUrl = string.Format(BaseUrlFormat, date.ToString("yyyy-MM-dd"), "00-00-00");
+        var timeListUrl = string.Format(BaseUrlFormat, date.ToString("yyyy-MM-dd"), DefaultSnapshotTime);
 
         var updatedTimes = await GetUpdatedTimesAsync(client, timeListUrl);
         if (updatedTimes is null || updatedTimes.Count == 0)
-            return 0;
+            return Result<int>.Ok(0, "No snapshots found for the specified date.");
 
         var existingSnapshots = await _exchangeRateRepository.GetSnapshotTimesAsync(date);
         var existingSnapshotSet = new HashSet<DateTime>(existingSnapshots);
@@ -44,7 +46,7 @@ public class ExchangeRateService : IExchangeRateService
 
         foreach (var time in updatedTimes)
         {
-            var snapshotDateTime = ParseSnapshotDateTime(date, time);
+            var snapshotDateTime = ParseHelper.ParseSnapshotDateTime(date, time);
             if (existingSnapshotSet.Contains(snapshotDateTime)) continue;
 
             var formattedDate = date.ToString("yyyy-MM-dd");
@@ -64,32 +66,37 @@ public class ExchangeRateService : IExchangeRateService
             await _exchangeRateRepository.SaveChangesAsync();
         }
 
-        return totalRatesSaved;
+        return Result<int>.Ok(totalRatesSaved, "Snapshots imported successfully.");
     }
 
-    public async Task<List<ExchangeRateResponse>> GetExchangeRateSnapshotsAsync(DateOnly date, string currencyCode)
+    public async Task<Result<List<ExchangeRateResponse>>> GetExchangeRateSnapshotsAsync(DateOnly date, string currencyCode)
     {
-        var startUtc = DateTime.SpecifyKind(date.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc);
-        var endUtc = DateTime.SpecifyKind(date.ToDateTime(TimeOnly.MaxValue), DateTimeKind.Utc);
+        try
+        {
+            var startUtc = DateTime.SpecifyKind(date.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc);
+            var endUtc = DateTime.SpecifyKind(date.ToDateTime(TimeOnly.MaxValue), DateTimeKind.Utc);
 
-        var exchangeRates = _exchangeRateRepository.QueryExchangeRates()
-                                                   .Where(rate =>
-                                                        rate.Currency.Code == currencyCode &&
-                                                        rate.Snapshot.SnapshotDateTime >= startUtc &&
-                                                        rate.Snapshot.SnapshotDateTime <= endUtc)
-                                                   .OrderBy(rate => rate.Currency.Code)
-                                                   .ThenBy(rate => rate.Snapshot.SnapshotDateTime)
-                                                   .Select(rate => new ExchangeRateResponse
-                                                   {
-                                                        CurrencyCode = rate.Currency.Code,
-                                                        SnapshotTime = rate.Snapshot.SnapshotDateTime,
-                                                        PurchaseCashCheque = rate.BidRateCK,
-                                                        PurchaseTransfer = rate.BidRateTM,
-                                                        SellingCashCheque = rate.AskRate,
-                                                        SellingTransfer = rate.AskRateTM
-                                                   });
+            var exchangeRates = _exchangeRateRepository.QueryExchangeRates()
+                .Where(rate => rate.Currency.Code == currencyCode &&
+                               rate.Snapshot.SnapshotDateTime >= startUtc &&
+                               rate.Snapshot.SnapshotDateTime <= endUtc)
+                .OrderBy(rate => rate.Snapshot.SnapshotDateTime)
+                .Select(rate => new ExchangeRateResponse
+                {
+                    CurrencyCode = rate.Currency.Code,
+                    SnapshotTime = rate.Snapshot.SnapshotDateTime,
+                    PurchaseCashCheque = rate.BidRateCK,
+                    PurchaseTransfer = rate.BidRateTM,
+                    SellingCashCheque = rate.AskRate,
+                    SellingTransfer = rate.AskRateTM
+                });
 
-        return await exchangeRates.ToListAsync();
+            return Result<List<ExchangeRateResponse>>.Ok(await exchangeRates.ToListAsync());
+        }
+        catch (Exception ex)
+        {
+            return Result<List<ExchangeRateResponse>>.Fail("Error fetching exchange rates", new() { ex.Message });
+        }
     }
 
     private HttpClient CreateConfiguredClient()
@@ -102,7 +109,7 @@ public class ExchangeRateService : IExchangeRateService
         return client;
     }
 
-    private async Task<List<string>?> GetUpdatedTimesAsync(HttpClient client, string url)
+    private static async Task<List<string>?> GetUpdatedTimesAsync(HttpClient client, string url)
     {
         var response = await client.GetAsync(url);
         if (!response.IsSuccessStatusCode) return null;
@@ -114,14 +121,6 @@ public class ExchangeRateService : IExchangeRateService
         });
 
         return wrapper?.ExchangeRate?.UpdatedTimes;
-    }
-
-    private DateTime ParseSnapshotDateTime(DateOnly date, string time)
-    {
-        return DateTime.SpecifyKind(
-            DateTime.ParseExact($"{date:yyyy-MM-dd} {time}", "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture),
-            DateTimeKind.Utc
-        );
     }
 
     private async Task<ExchangeRateSnapshot?> BuildSnapshotFromUrlAsync(HttpClient client, string url, DateTime snapshot)
@@ -152,10 +151,10 @@ public class ExchangeRateService : IExchangeRateService
             var rate = new ExchangeRate
             {
                 Currency = currency,
-                AskRate = ParseDecimal(item.AskRate),
-                AskRateTM = ParseDecimal(item.AskRateTM),
-                BidRateCK = ParseDecimal(item.BidRateCK),
-                BidRateTM = ParseDecimal(item.BidRateTM)
+                AskRate = ParseHelper.ParseDecimal(item.AskRate),
+                AskRateTM = ParseHelper.ParseDecimal(item.AskRateTM),
+                BidRateCK = ParseHelper.ParseDecimal(item.BidRateCK),
+                BidRateTM = ParseHelper.ParseDecimal(item.BidRateTM)
             };
 
             snapshotEntity.ExchangeRates.Add(rate);
@@ -163,7 +162,4 @@ public class ExchangeRateService : IExchangeRateService
 
         return snapshotEntity;
     }
-
-    private decimal ParseDecimal(string? input) =>
-        decimal.TryParse(input, NumberStyles.Any, CultureInfo.InvariantCulture, out var result) ? result : 0;
 }

@@ -13,15 +13,24 @@ namespace TCBExchangeRate.Infrastructure.Services
             _currencyRepository = currencyRepository;
         }
 
-        public async Task<List<CurrencyResponse>> GetAllCurrenciesAsync()
+        public async Task<Result<List<CurrencyResponse>>> GetAllCurrenciesAsync()
         {
-            var currencies = await _currencyRepository.GetAllCurrenciesAsync();
-
-            return currencies.Select(c => new CurrencyResponse
+            try
             {
-                Id = c.Id,
-                Code = c.Code
-            }).ToList();
+                var currencies = await _currencyRepository.GetAllCurrenciesAsync();
+
+                var response = currencies.Select(c => new CurrencyResponse
+                {
+                    Id = c.Id,
+                    Code = c.Code
+                }).ToList();
+
+                return Result<List<CurrencyResponse>>.Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return Result<List<CurrencyResponse>>.Fail("Failed to get currencies", new() { ex.Message });
+            }
         }
     }
 }

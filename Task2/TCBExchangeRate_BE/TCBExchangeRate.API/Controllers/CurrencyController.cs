@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using TCBExchangeRate.Application.Interfaces;
 
 namespace TCBExchangeRate.API.Controllers
@@ -18,8 +17,8 @@ namespace TCBExchangeRate.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var currencies = await _currencyService.GetAllCurrenciesAsync();
-            return Ok(currencies);
+            var result = await _currencyService.GetAllCurrenciesAsync();
+            return result.Success ? Ok(result) : BadRequest(result);
         }
     }
 }

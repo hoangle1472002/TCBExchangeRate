@@ -10,6 +10,7 @@
     <None Remove="Models\" />
     <None Remove="Models\Responses\" />
     <None Remove="Models\Requests\" />
+    <None Remove="Helpers\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Dtos\" />
@@ -17,6 +18,7 @@
     <Folder Include="Models\" />
     <Folder Include="Models\Responses\" />
     <Folder Include="Models\Requests\" />
+    <Folder Include="Helpers\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.6" />

@@ -3,85 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <title>Techcombank Exchange Rates</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f9f9f9;
-      margin: 40px;
-      color: #333;
-    }
-
-    h1 {
-      margin-bottom: 20px;
-      color: #d00000;
-    }
-
-    .form-group {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      flex-wrap: wrap;
-    }
-
-    label {
-      font-weight: 500;
-    }
-
-    select, input[type="date"], button {
-      padding: 6px 12px;
-      font-size: 14px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-
-    button {
-      background-color: #d00000;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #a00000;
-    }
-
-    .summary {
-      margin-top: 30px;
-      font-size: 16px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-      background-color: white;
-      box-shadow: 0 0 10px rgba(0,0,0,0.05);
-    }
-
-    th, td {
-      border: 1px solid #ddd;
-      padding: 10px;
-      text-align: center;
-      font-size: 14px;
-    }
-
-    th {
-      background-color: #f0f0f0;
-      font-weight: 600;
-    }
-
-    .hidden {
-      display: none;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <h1>Techcombank Exchange Rates</h1>
 
   <div class="form-group">
     <label for="currency">Currency:</label>
-    <select id="currency">
-    </select>
+    <select id="currency"></select>
 
     <label for="date">Date:</label>
     <input type="date" id="date" />
@@ -105,100 +34,9 @@
         <th>Transfer</th>
       </tr>
     </thead>
-    <tbody>
-    </tbody>
+    <tbody></tbody>
   </table>
 
-  <script>
-    const currencySelect = document.getElementById('currency');
-    const dateInput = document.getElementById('date');
-    const table = document.getElementById('ratesTable');
-    const summary = document.getElementById('summary');
-    const tbody = table.querySelector('tbody');
-
-    const apiBase = 'https://localhost:7138/api';
-
-    async function loadCurrencies() {
-      try {
-        const res = await fetch(`${apiBase}/currencies`);
-        const data = await res.json();
-
-        data.forEach(currency => {
-          const option = document.createElement('option');
-          option.value = currency.code;
-          option.text = currency.code;
-          currencySelect.appendChild(option);
-        });
-      } catch (err) {
-        alert('Failed to load currencies');
-      }
-    }
-
-    const today = new Date();
-    const formatted = today.toISOString().split('T')[0];
-    document.getElementById('date').value = formatted;
-
-    function formatTime(datetime) {
-      const dt = new Date(datetime);
-      return dt.toUTCString().split(' ')[4];
-    }
-
-    function formatDateReadable(inputDate) {
-      const date = new Date(inputDate);
-      return date.toLocaleDateString('en-GB');
-    }
-
-    async function fetchExchangeRates() {
-      const date = dateInput.value;
-      const currencyCode = currencySelect.value;
-
-      if (!date) {
-        alert('Please select a date.');
-        return;
-      }
-
-      const formattedDate = new Date(date).toISOString().split('T')[0]; // yyyy-MM-dd
-      let url = `${apiBase}/exchangerate/snapshots?date=${formattedDate}&currencyCode=${currencyCode}`;
-
-      try {
-        const res = await fetch(url);
-        const rates = await res.json();
-
-        tbody.innerHTML = '';
-        if (!rates.length) {
-          table.classList.add('hidden');
-          summary.classList.add('hidden');
-          alert('No data found for the selected date and currency.');
-          return;
-        }
-
-        summary.textContent = `Date: ${formatDateReadable(date)}${currencyCode ? ` | Currency: ${currencyCode}` : ''}`;
-        summary.classList.remove('hidden');
-
-        rates.forEach(rate => {
-            const row = document.createElement('tr');
-            const formatValue = (value) => {
-              return value === 0 ? '' : value?.toLocaleString() ?? '-';
-            };
-          
-            row.innerHTML = `
-              <td>${formatTime(rate.snapshotTime)}</td>
-              <td>${formatValue(rate.purchaseCashCheque)}</td>
-              <td>${formatValue(rate.purchaseTransfer)}</td>
-              <td>${formatValue(rate.sellingCashCheque)}</td>
-              <td>${formatValue(rate.sellingTransfer)}</td>
-            `;
-            tbody.appendChild(row);
-          });
-
-        table.classList.remove('hidden');
-      } catch (err) {
-        alert('Error fetching exchange rates.');
-        console.error(err);
-      }
-    }
-
-    window.onload = loadCurrencies;
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>

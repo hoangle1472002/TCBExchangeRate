@@ -4,7 +4,6 @@ namespace TCBExchangeRate.Application.Interfaces
 {
 	public interface ICurrencyService
 	{
-        Task<List<CurrencyResponse>> GetAllCurrenciesAsync();
+        Task<Result<List<CurrencyResponse>>> GetAllCurrenciesAsync();
     }
 }
-
