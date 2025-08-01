@@ -7,7 +7,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="A responsive wiki page optimized for mobile, tablet, and desktop devices.">
     <link rel="stylesheet" href="/style.css" />
-
 </head>
 
 <body>
@@ -47,15 +46,15 @@
             <p>And other text lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
 
             <div class="links">
-                <strong>10 Children.</strong>
-                <a href="#">Show Children</a> |
-                <a href="#">View in Hierarchy</a> |
-                <a href="#">Add Child Page</a>
+                <strong>10 Children</strong>
+                <a href="#" aria-label="Show child pages">Show Children</a>
+                <a href="#" aria-label="View page hierarchy">View in Hierarchy</a>
+                <a href="#" aria-label="Add a new child page">Add Child Page</a>
             </div>
 
             <footer>
-                0 Comments
-                <a href="#">Add Comment</a>
+                <span>0 Comments</span>
+                <a href="#" aria-label="Add a comment">Add Comment</a>
             </footer>
         </main>
 
@@ -81,10 +80,6 @@
             const otherSidebarId = id === 'sidebar' ? 'user-sidebar' : 'sidebar';
             const otherSidebar = document.getElementById(otherSidebarId);
             otherSidebar.classList.remove('active');
-            // Focus management for accessibility
-            if (sidebar.classList.contains('active')) {
-                sidebar.querySelector('.close-btn').focus();
-            }
         }
     </script>
 </body>
