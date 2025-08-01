@@ -6,6 +6,8 @@ using TCBExchangeRate.Persistence.Services;
 using TCBExchangeRate.Infrastructure.Services;
 using TCBExchangeRate.Persistence.Data;
 using TCBExchangeRate.Infrastructure.Repositories;
+using Quartz;
+using TCBExchangeRate.Infrastructure.Jobs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,6 +39,19 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddQuartz(q =>
+{
+    var jobKey = new JobKey("ExchangeRateImportJob");
+    q.AddJob<ExchangeRateImportJob>(opts => opts.WithIdentity(jobKey));
+
+    q.AddTrigger(opts => opts
+        .ForJob(jobKey)
+        .WithIdentity("ExchangeRateImportJob-trigger")
+        .WithCronSchedule("0 0 0 * * ?"));
+});
+
+builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -52,7 +67,7 @@ using (var scope = app.Services.CreateScope())
         await seeder.SeedAsync();
 
         var service = scope.ServiceProvider.GetRequiredService<IExchangeRateService>();
-        var totalSaved = await service.ImportExchangeRatesFromPastMonthAsync();
+        var totalSaved = await service.ImportExchangeRatesFromPastWeekAsync();
         logger.LogInformation("Done: {TotalSaved} exchange rates saved.", totalSaved);
     }
     catch (Exception ex)

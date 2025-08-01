@@ -37,7 +37,7 @@ public class ExchangeRateService : IExchangeRateService
         _logger.LogInformation("Starting import for date {Date}", date);
 
         var client = CreateConfiguredClient();
-        var timeListUrl = string.Format(BaseUrlFormat, date.ToString("yyyy-MM-dd"), DefaultSnapshotTime);
+        var timeListUrl = string.Format(BaseUrlFormat, date.ToString(DateTimeHelper.DateTimeFormat), DefaultSnapshotTime);
 
         var updatedTimes = await GetUpdatedTimesAsync(client, timeListUrl);
         if (updatedTimes is null || updatedTimes.Count == 0)
@@ -61,7 +61,7 @@ public class ExchangeRateService : IExchangeRateService
                 continue;
             }
 
-            var formattedDate = date.ToString("yyyy-MM-dd");
+            var formattedDate = date.ToString(DateTimeHelper.DateTimeFormat);
             var formattedTime = time.Replace(":", "-");
             var detailUrl = string.Format(BaseUrlFormat, formattedDate, formattedTime);
 
@@ -89,15 +89,15 @@ public class ExchangeRateService : IExchangeRateService
         return Result<int>.Ok(totalRatesSaved, "Snapshots imported successfully.");
     }
 
-    public async Task<int> ImportExchangeRatesFromPastMonthAsync()
+    public async Task<int> ImportExchangeRatesFromPastWeekAsync()
     {
-        _logger.LogInformation("Starting import of exchange rates from past month");
+        _logger.LogInformation("Starting import of exchange rates from past week");
 
         var today = DateOnly.FromDateTime(DateTime.Today);
-        var oneMonthAgo = today.AddMonths(-1);
+        var oneWeekAgo = today.AddDays(-DateTimeHelper.DaysInPastWeek);
 
         int total = 0;
-        for (var date = oneMonthAgo; date <= today; date = date.AddDays(1))
+        for (var date = oneWeekAgo; date <= today; date = date.AddDays(1))
         {
             var result = await ImportExchangeRatesAsync(date);
             if (result.Success)
@@ -111,7 +111,7 @@ public class ExchangeRateService : IExchangeRateService
             }
         }
 
-        _logger.LogInformation("Completed monthly import. Total rates saved: {Total}", total);
+        _logger.LogInformation("Completed weekly import. Total rates saved: {Total}", total);
         return total;
     }
 

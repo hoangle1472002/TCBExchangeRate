@@ -27,9 +27,21 @@ This project is a .NET Core 8.0 console application combined with a Web API to f
 
 ### Auto Fetch on Startup
 
-- When the application starts, it automatically retrieves foreign exchange rate data from Techcombank for the past month (from today to 30 days ago).
+- When the application starts, it automatically retrieves foreign exchange rate data from Techcombank for the past week (from today to 7 days ago).
 
-### Fetch by Specific Date (API)
+### Scheduled Fetching Using Quartz
+
+- The application uses Quartz.NET to schedule a background job that automatically retrieves foreign exchange rate data from Techcombank.
+
+- The scheduled job (ExchangeRateImportJob) is triggered daily at 00:00 (midnight). When the job runs, it fetches exchange rate data for the previous day
+
+### Manual Fetch via API
+
+- In addition to the scheduled job, the application supports on-demand fetching via an API: `POST /api/exchangerate/fetch?date=yyyy-MM-dd`
+- Manually triggers the fetch process to retrieve exchange rate data from Techcombank for a specific date.
+- Useful for backfilling or re-fetching data due to failures or corrections.
+
+### Retrieve All Exchange Rates by Currency and Date
 
 - Endpoint: `GET /api/exchangerate/snapshots?date=yyyy-MM-dd&currencyCode=XXX`
 - Returns purchase/selling rates for cash, cheque, and transfer methods on the specified date.
@@ -38,11 +50,6 @@ This project is a .NET Core 8.0 console application combined with a Web API to f
 
 - Endpoint: `GET /api/currencies`
 - Returns a list of available currencies with their name and code.
-
-### Retrieve All Exchange Rates by Currency and Date
-
-- Endpoint: `GET /api/exchangerate/all?date=yyyy-MM-dd&currencyCode=XXX`
-- Returns all available rate types for the selected currency on the specified date.
 
 ---
 
