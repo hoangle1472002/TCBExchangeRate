@@ -1,42 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <title>Techcombank Exchange Rates</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8" />
+    <title>Techcombank Exchange Rates</title>
+    <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
-  <h1>Techcombank Exchange Rates</h1>
+    <h1>Techcombank Exchange Rates</h1>
 
-  <div class="form-group">
-    <label for="currency">Currency:</label>
-    <select id="currency"></select>
+    <div class="form-group">
+        <label for="currency">Currency:</label>
+        <select id="currency"></select>
 
-    <label for="date">Date:</label>
-    <input type="date" id="date" />
+        <label for="date">Date:</label>
+        <input type="date" id="date" />
 
-    <button onclick="fetchExchangeRates()">Search</button>
-  </div>
+        <button onclick="fetchExchangeRates()">Search</button>
+    </div>
 
-  <div class="summary hidden" id="summary"></div>
+    <div class="summary hidden" id="summary"></div>
+    <div id="loader" class="loader" role="status" aria-label="Loading exchange rate data..."></div>
+    <table id="ratesTable" class="hidden">
+        <thead>
+            <tr>
+                <th rowspan="2">Time</th>
+                <th colspan="2">Purchase Rate</th>
+                <th colspan="2">Selling Rate</th>
+            </tr>
+            <tr>
+                <th>Cash/Cheque</th>
+                <th>Transfer</th>
+                <th>Cash/Cheque</th>
+                <th>Transfer</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
 
-  <table id="ratesTable" class="hidden">
-    <thead>
-      <tr>
-        <th rowspan="2">Time</th>
-        <th colspan="2">Purchase Rate</th>
-        <th colspan="2">Selling Rate</th>
-      </tr>
-      <tr>
-        <th>Cash/Cheque</th>
-        <th>Transfer</th>
-        <th>Cash/Cheque</th>
-        <th>Transfer</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-
-  <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
+
 </html>
